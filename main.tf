@@ -5,6 +5,7 @@ data "aws_caller_identity" "this" {}
 #
 module "lambda_notifyOnError" {
   source = "terraform-aws-modules/lambda/aws"
+  version = "= 8.1.1"
 
   function_name                  = "${var.prefix}-notifyOnError"
   description                    = "Notifies admin when lambda functions encounter an error."
