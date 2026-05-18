@@ -11,7 +11,7 @@ data "aws_region" "current" {}
 #
 # notifyOnError Lambda Function
 #
-module "lambda-notifyOnError" {
+module "lambda_notifyOnError" {
   source = "terraform-aws-modules/lambda/aws"
 
   function_name                  = "error-catcher-notifyOnError"
@@ -22,17 +22,17 @@ module "lambda-notifyOnError" {
   timeout                        = 300
   reserved_concurrent_executions = 1 # To avoid duplicated emails
   attach_policy_json             = true
-  policy_json                    = data.aws_iam_policy_document.lambda-notifyOnError.json
+  policy_json                    = data.aws_iam_policy_document.lambda_notifyOnError.json
   source_path                    = "${path.module}/lambda/notifyOnError"
   tags                           = data.aws_default_tags.this.tags
 
   environment_variables = {
     ACCOUNT_ID            = data.aws_caller_identity.this.account_id
-    ALARM_NAME            = aws_cloudwatch_metric_alarm.notifyOnError-alarm.alarm_name
-    RECENT_ERRORS_BUCKET  = aws_s3_bucket.recent-errors.bucket
+    ALARM_NAME            = aws_cloudwatch_metric_alarm.notifyOnError_alarm.alarm_name
+    RECENT_ERRORS_BUCKET  = aws_s3_bucket.recent_errors.bucket
     RECENT_ERRORS_MINUTES = local.recent_errors_minutes
-    SES_SOURCE_EMAIL      = var.ses-source-email
-    SES_TARGET_EMAILS     = join(",", var.ses-target-emails)
-    TRIGGER_NAME          = aws_cloudwatch_event_rule.notifyOnError-trigger.name
+    SES_SOURCE_EMAIL      = var.ses_source_email
+    SES_TARGET_EMAILS     = join(",", var.ses_target_emails)
+    TRIGGER_NAME          = aws_cloudwatch_event_rule.notifyOnError_trigger.name
   }
 }

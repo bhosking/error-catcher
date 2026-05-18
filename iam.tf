@@ -1,14 +1,14 @@
 #
 # notifyOnError Lambda Function
 #
-data "aws_iam_policy_document" "lambda-notifyOnError" {
+data "aws_iam_policy_document" "lambda_notifyOnError" {
 
   statement {
     actions = [
       "cloudwatch:DescribeAlarms",
     ]
     resources = [
-      aws_cloudwatch_metric_alarm.notifyOnError-alarm.arn,
+      aws_cloudwatch_metric_alarm.notifyOnError_alarm.arn,
     ]
   }
 
@@ -19,7 +19,7 @@ data "aws_iam_policy_document" "lambda-notifyOnError" {
       "events:disableRule",
     ]
     resources = [
-      aws_cloudwatch_event_rule.notifyOnError-trigger.arn,
+      aws_cloudwatch_event_rule.notifyOnError_trigger.arn,
     ]
   }
 
@@ -28,7 +28,7 @@ data "aws_iam_policy_document" "lambda-notifyOnError" {
       "s3:ListBucket",
     ]
     resources = [
-      aws_s3_bucket.recent-errors.arn,
+      aws_s3_bucket.recent_errors.arn,
     ]
   }
 
@@ -38,7 +38,7 @@ data "aws_iam_policy_document" "lambda-notifyOnError" {
       "s3:PutObject",
     ]
     resources = [
-      "${aws_s3_bucket.recent-errors.arn}/*",
+      "${aws_s3_bucket.recent_errors.arn}/*",
     ]
   }
 

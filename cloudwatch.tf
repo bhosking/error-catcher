@@ -1,4 +1,4 @@
-resource "aws_cloudwatch_metric_alarm" "notifyOnError-alarm" {
+resource "aws_cloudwatch_metric_alarm" "notifyOnError_alarm" {
   alarm_name          = "error-catcher-notifyOnError"
   comparison_operator = "GreaterThanThreshold"
   evaluation_periods  = 1
@@ -12,14 +12,14 @@ resource "aws_cloudwatch_metric_alarm" "notifyOnError-alarm" {
   treat_missing_data  = "notBreaching"
 }
 
-resource "aws_cloudwatch_event_rule" "notifyOnError-trigger" {
+resource "aws_cloudwatch_event_rule" "notifyOnError_trigger" {
   name                = "error-catcher-notifyOnError-trigger"
   description         = "A trigger that runs the notifyOnError lambda function while the alarm is in ALARM state."
   schedule_expression = "cron(*/20 * * * ? *)" # every 20 minutes
 }
 
-resource "aws_cloudwatch_event_target" "notifyOnError-trigger" {
-  rule      = aws_cloudwatch_event_rule.notifyOnError-trigger.name
+resource "aws_cloudwatch_event_target" "notifyOnError_trigger" {
+  rule      = aws_cloudwatch_event_rule.notifyOnError_trigger.name
   target_id = "error-catcher-lambda-notifyOnError"
-  arn       = module.lambda-notifyOnError.lambda_function_arn
+  arn       = module.lambda_notifyOnError.lambda_function_arn
 }

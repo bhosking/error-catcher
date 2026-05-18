@@ -31,8 +31,8 @@ If an error metric has no matching log event (e.g. an unrecognised error format)
 module "error-catcher" {
   source = "path/to/error-catcher"
 
-  ses-source-email  = "alerts@example.com"
-  ses-target-emails = ["admin@example.com", "oncall@example.com"]
+  ses_source_email  = "alerts@example.com"
+  ses_target_emails = ["admin@example.com", "oncall@example.com"]
 }
 ```
 
@@ -49,8 +49,8 @@ All email addresses must be verified in SES. The source email address can be one
 
 | Name | Description |
 |------|-------------|
-| `ses-source-email` | Address from which alert emails are sent (must be verified in SES) |
-| `ses-target-emails` | List of email addresses to notify when errors occur (each must be verified in SES) |
+| `ses_source_email` | Address from which alert emails are sent (must be verified in SES) |
+| `ses_target_emails` | List of email addresses to notify when errors occur (each must be verified in SES) |
 
 ## Manual invocation
 
