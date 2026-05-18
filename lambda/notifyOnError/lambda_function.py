@@ -14,8 +14,7 @@ ACCOUNT_ID = os.environ["ACCOUNT_ID"]
 ALARM_NAME = os.environ["ALARM_NAME"]
 RECENT_ERRORS_BUCKET = os.environ["RECENT_ERRORS_BUCKET"]
 RECENT_ERRORS_MINUTES = int(os.environ["RECENT_ERRORS_MINUTES"])
-SES_SOURCE_EMAIL = os.environ["SES_SOURCE_EMAIL"]
-SES_TARGET_EMAILS = os.environ["SES_TARGET_EMAILS"].split(",")
+ERROR_NOTIFICATIONS_SNS_TOPIC_ARN = os.environ["ERROR_NOTIFICATIONS_SNS_TOPIC_ARN"]
 TRIGGER_NAME = os.environ["TRIGGER_NAME"]
 CLOUDWATCH_PERIOD = 60  # Seconds for CloudWatch metric period
 LEADING_MILLISECONDS = 100  # Milliseconds to include before error in logs
@@ -35,7 +34,7 @@ SUBJECT = f"AWS Lambda Function Error Alert for Account {ACCOUNT_ID}"
 cloudwatch = boto3.client("cloudwatch")
 events = boto3.client("events")
 logs = boto3.client("logs")
-ses = boto3.client("ses")
+sns = boto3.client("sns")
 s3 = boto3.client("s3")
 
 
@@ -204,18 +203,12 @@ class FunctionError:
                 kwargs["nextToken"] = next_token
         self.log_errors = errors
 
-    def error_html(self, message, count, link):
-        return f"""
-            <tr>
-                <td>{self.function_name}</td>
-                <td>{message}</td>
-                <td>{count}</td>
-                <td><a href="{link}" target="_blank" rel="noopener noreferrer">View Logs</a></td>
-            </tr>"""
+    def format_error(self, message, count, link):
+        return f"\nFunction: {self.function_name}\n  Error: {message}\n  Count: {count}\n  Logs: {link}\n"
 
-    def all_errors_html(self):
+    def all_errors_text(self):
         return "".join(
-            self.error_html(message, details["count"], details["link"])
+            self.format_error(message, details["count"], details["link"])
             for message, details in self.log_errors.items()
         )
 
@@ -271,21 +264,14 @@ def tuplify(list_of_lists):
     return [tuple(item) for item in list_of_lists]
 
 
-def send_email(subject, body_html):
+def publish_notification(subject, message):
     kwargs = {
-        "Source": SES_SOURCE_EMAIL,
-        "Destination": {
-            "ToAddresses": SES_TARGET_EMAILS,
-        },
-        "Message": {
-            "Subject": {"Data": subject},
-            "Body": {
-                "Html": {"Data": body_html},
-            },
-        },
+        "TopicArn": ERROR_NOTIFICATIONS_SNS_TOPIC_ARN,
+        "Subject": subject,
+        "Message": message,
     }
-    print(f"Calling ses_client.send_email with kwargs: {json.dumps(kwargs)}")
-    response = ses.send_email(**kwargs)
+    print(f"Calling sns.publish with kwargs: {json.dumps(kwargs)}")
+    response = sns.publish(**kwargs)
     print(f"Received response: {json.dumps(response, default=str)}")
 
 
@@ -297,65 +283,8 @@ def trim_error(error_message):
         return first_line
 
 
-def create_email_body(error_info):
-    body_html = f"""
-    <html>
-      <head>
-        <style>
-          body {{
-            font-family: Arial, sans-serif;
-            color: #333;
-          }}
-          .container {{
-            max-width: 800px;
-            margin: auto;
-            padding: 20px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            background-color: #f9f9f9;
-          }}
-          h1 {{
-            color: #d13212;
-          }}
-          h2 {{
-            color: #33548e;
-          }}
-          p {{
-            line-height: 1.6;
-          }}
-          table {{
-            border-collapse: collapse;
-            width: 100%;
-          }}
-          th, td {{
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-          }}
-          th {{
-            background-color: #f2f2f2;
-          }}
-        </style>
-      </head>
-      <body>
-        <div class="container">
-          <h1>Lambda Function Error Alert</h1>
-          <p><strong>Account ID:</strong> {ACCOUNT_ID}</p>
-          <h2>Errors Detected</h2>
-          <table>
-            <tr>
-              <th>Function Name</th>
-              <th>Error Message</th>
-              <th>Error Count</th>
-              <th>Log Link</th>
-            </tr>{error_info}
-          </table>
-          <p>This is an automated alert. Please do not reply to this email.</p>
-        </div>
-      </body>
-    </html>
-    """
-    return body_html
+def create_message_body(error_info):
+    return f"Lambda Function Error Alert\nAccount: {ACCOUNT_ID}\n{error_info}"
 
 
 def function_to_metric(function_name):
@@ -379,7 +308,7 @@ def function_to_metric(function_name):
     }
 
 
-def get_all_error_html(start_ms, end_ms, track_old_errors=True):
+def get_all_error_text(start_ms, end_ms, track_old_errors=True):
     recent_errors = get_recent_errors() if track_old_errors else {}
     function_names = list_function_error_metrics()
     error_metrics = get_error_metrics(function_names, start_ms, end_ms)
@@ -402,10 +331,10 @@ def get_all_error_html(start_ms, end_ms, track_old_errors=True):
             )
     if track_old_errors:
         put_recent_errors(new_recent_errors)
-    html = "".join(function.all_errors_html() for function in function_errors)
-    if not html:
+    text = "".join(function.all_errors_text() for function in function_errors)
+    if not text:
         print("No errors found.")
-    return html
+    return text
 
 
 def list_function_error_metrics():
@@ -540,9 +469,9 @@ def lambda_handler(event, context):
             "end_ms", int(datetime.now(timezone.utc).timestamp() * 1000)
         )
         print(f"Running with provided window: {start_time} to {end_time}")
-        error_html = get_all_error_html(start_time, end_time, track_old_errors=False)
-        if error_html:
-            send_email(SUBJECT, create_email_body(error_html))
+        error_text = get_all_error_text(start_time, end_time, track_old_errors=False)
+        if error_text:
+            publish_notification(SUBJECT, create_message_body(error_text))
     else:
         scheduled = check_schedule()
         if is_alarmed():
@@ -551,9 +480,9 @@ def lambda_handler(event, context):
                 start_schedule()
             end_time = int(datetime.now(timezone.utc).timestamp() * 1000)
             start_time = end_time - RECENT_ERRORS_MINUTES * 60 * 1000
-            error_html = get_all_error_html(start_time, end_time)
-            if error_html:
-                send_email(SUBJECT, create_email_body(error_html))
+            error_text = get_all_error_text(start_time, end_time)
+            if error_text:
+                publish_notification(SUBJECT, create_message_body(error_text))
         elif scheduled:
             print("Alarm is inactive, stopping schedule.")
             stop_schedule()

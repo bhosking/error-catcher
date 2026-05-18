@@ -24,8 +24,7 @@ module "lambda_notifyOnError" {
     ALARM_NAME            = aws_cloudwatch_metric_alarm.notifyOnError_alarm.alarm_name
     RECENT_ERRORS_BUCKET  = aws_s3_bucket.recent_errors.bucket
     RECENT_ERRORS_MINUTES = local.recent_errors_minutes
-    SES_SOURCE_EMAIL      = var.ses_source_email
-    SES_TARGET_EMAILS     = join(",", var.ses_target_emails)
+    ERROR_NOTIFICATIONS_SNS_TOPIC_ARN = aws_sns_topic.error_notifications.arn
     TRIGGER_NAME          = aws_cloudwatch_event_rule.notifyOnError_trigger.name
   }
 }

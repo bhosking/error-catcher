@@ -63,11 +63,10 @@ data "aws_iam_policy_document" "lambda_notifyOnError" {
 
   statement {
     actions = [
-      "ses:SendEmail"
+      "sns:Publish",
     ]
     resources = [
-      "arn:aws:ses:${var.region}:${data.aws_caller_identity.this.account_id}:identity/*",
-      "arn:aws:ses:${var.region}:${data.aws_caller_identity.this.account_id}:configuration-set/*",
+      aws_sns_topic.error_notifications.arn,
     ]
   }
 }
