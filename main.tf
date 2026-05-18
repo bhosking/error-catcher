@@ -1,12 +1,4 @@
-locals {
-  # Define the time period for which to track recent errors
-  # This should be at least 15 minutes (lambda timeout) plus 20 minutes (trigger interval)
-  recent_errors_minutes = 40
-}
-
 data "aws_caller_identity" "this" {}
-data "aws_default_tags" "this" {}
-data "aws_region" "current" {}
 
 #
 # notifyOnError Lambda Function
@@ -24,7 +16,6 @@ module "lambda_notifyOnError" {
   attach_policy_json             = true
   policy_json                    = data.aws_iam_policy_document.lambda_notifyOnError.json
   source_path                    = "${path.module}/lambda/notifyOnError"
-  tags                           = data.aws_default_tags.this.tags
 
   environment_variables = {
     ACCOUNT_ID            = data.aws_caller_identity.this.account_id

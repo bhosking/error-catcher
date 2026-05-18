@@ -57,7 +57,7 @@ data "aws_iam_policy_document" "lambda_notifyOnError" {
       "logs:FilterLogEvents",
     ]
     resources = [
-      "arn:aws:logs:${data.aws_region.current.region}:${data.aws_caller_identity.this.account_id}:log-group:/aws/lambda/*",
+      "arn:aws:logs:${var.region}:${data.aws_caller_identity.this.account_id}:log-group:/aws/lambda/*",
     ]
   }
 
@@ -66,8 +66,8 @@ data "aws_iam_policy_document" "lambda_notifyOnError" {
       "ses:SendEmail"
     ]
     resources = [
-      "arn:aws:ses:${data.aws_region.current.region}:${data.aws_caller_identity.this.account_id}:identity/*",
-      "arn:aws:ses:${data.aws_region.current.region}:${data.aws_caller_identity.this.account_id}:configuration-set/*",
+      "arn:aws:ses:${var.region}:${data.aws_caller_identity.this.account_id}:identity/*",
+      "arn:aws:ses:${var.region}:${data.aws_caller_identity.this.account_id}:configuration-set/*",
     ]
   }
 }

@@ -27,13 +27,33 @@ If an error metric has no matching log event (e.g. an unrecognised error format)
 
 ## Usage
 
-```hcl
-module "error-catcher" {
-  source = "path/to/error-catcher"
+Recommended to create a `backend.tf` file to store the state remotely, here shown referencing an (existing) S3 bucket:
 
-  ses_source_email  = "alerts@example.com"
-  ses_target_emails = ["admin@example.com", "oncall@example.com"]
+```hcl
+terraform {
+  backend "s3" {
+    bucket       = "terraform-states"
+    key          = "error-catcher-apse2.tfstate"
+    region       = "ap-southeast-2"
+    use_lockfile = true
+  }
 }
+```
+
+Create a `terraform.tfvars` file:
+
+```hcl
+region            = "ap-southeast-2"
+common_tags       = { Project = "myproject", Environment = "prod" }
+ses_source_email  = "alerts@example.com"
+ses_target_emails = ["admin@example.com", "oncall@example.com"]
+```
+
+Then deploy:
+
+```shell
+terraform init
+terraform apply
 ```
 
 All email addresses must be verified in SES. The source email address can be one of the target email addresses.
@@ -49,6 +69,8 @@ All email addresses must be verified in SES. The source email address can be one
 
 | Name | Description |
 |------|-------------|
+| `region` | AWS region to deploy into |
+| `common_tags` | Map of tags applied to all resources |
 | `ses_source_email` | Address from which alert emails are sent (must be verified in SES) |
 | `ses_target_emails` | List of email addresses to notify when errors occur (each must be verified in SES) |
 
