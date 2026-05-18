@@ -31,12 +31,12 @@ If an error metric has no matching log event (e.g. an unrecognised error format)
 module "error-catcher" {
   source = "path/to/error-catcher"
 
-  ses-source-email = "alerts@example.com"
-  ses-target-email = "admin@example.com"
+  ses-source-email  = "alerts@example.com"
+  ses-target-emails = ["admin@example.com", "oncall@example.com"]
 }
 ```
 
-Both email addresses must be verified in SES.
+All email addresses must be verified in SES. The source email address can be one of the target email addresses.
 
 ## Requirements
 
@@ -49,8 +49,8 @@ Both email addresses must be verified in SES.
 
 | Name | Description |
 |------|-------------|
-| `ses-source-email` | Address from which alert emails are sent |
-| `ses-target-email` | Administrator email address to notify when errors occur |
+| `ses-source-email` | Address from which alert emails are sent (must be verified in SES) |
+| `ses-target-emails` | List of email addresses to notify when errors occur (each must be verified in SES) |
 
 ## Manual invocation
 

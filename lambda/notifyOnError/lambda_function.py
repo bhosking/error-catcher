@@ -15,7 +15,7 @@ ALARM_NAME = os.environ["ALARM_NAME"]
 RECENT_ERRORS_BUCKET = os.environ["RECENT_ERRORS_BUCKET"]
 RECENT_ERRORS_MINUTES = int(os.environ["RECENT_ERRORS_MINUTES"])
 SES_SOURCE_EMAIL = os.environ["SES_SOURCE_EMAIL"]
-SES_TARGET_EMAIL = os.environ["SES_TARGET_EMAIL"]
+SES_TARGET_EMAILS = os.environ["SES_TARGET_EMAILS"].split(",")
 TRIGGER_NAME = os.environ["TRIGGER_NAME"]
 CLOUDWATCH_PERIOD = 60  # Seconds for CloudWatch metric period
 LEADING_MILLISECONDS = 100  # Milliseconds to include before error in logs
@@ -275,7 +275,7 @@ def send_email(subject, body_html):
     kwargs = {
         "Source": SES_SOURCE_EMAIL,
         "Destination": {
-            "ToAddresses": [SES_TARGET_EMAIL],
+            "ToAddresses": SES_TARGET_EMAILS,
         },
         "Message": {
             "Subject": {"Data": subject},

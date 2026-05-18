@@ -4,7 +4,7 @@ variable "ses-source-email" {
   description = "Address from which to send emails"
 }
 
-variable "ses-target-email" {
-  type        = string
-  description = "Email address of the administrator to notify when errors occur."
+variable "ses-target-emails" {
+  type        = list(string)
+  description = "Email addresses to notify when errors occur."
 }

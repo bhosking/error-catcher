@@ -32,7 +32,7 @@ module "lambda-notifyOnError" {
     RECENT_ERRORS_BUCKET  = aws_s3_bucket.recent-errors.bucket
     RECENT_ERRORS_MINUTES = local.recent_errors_minutes
     SES_SOURCE_EMAIL      = var.ses-source-email
-    SES_TARGET_EMAIL      = var.ses-target-email
+    SES_TARGET_EMAILS     = join(",", var.ses-target-emails)
     TRIGGER_NAME          = aws_cloudwatch_event_rule.notifyOnError-trigger.name
   }
 }
