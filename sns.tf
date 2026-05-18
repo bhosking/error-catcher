@@ -1,5 +1,5 @@
 resource "aws_sns_topic" "notifyOnError" {
-  name = "error-catcher-notifyOnError"
+  name = "${var.prefix}-notifyOnError"
 }
 
 resource "aws_sns_topic_subscription" "notifyOnError" {

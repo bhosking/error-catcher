@@ -44,6 +44,7 @@ Create a `terraform.tfvars` file:
 
 ```hcl
 region            = "ap-southeast-2"
+prefix            = "error-catcher-apse2"
 common_tags       = { Project = "myproject", Environment = "prod" }
 ses_source_email  = "alerts@example.com"
 ses_target_emails = ["admin@example.com", "oncall@example.com"]
@@ -70,6 +71,7 @@ All email addresses must be verified in SES. The source email address can be one
 | Name | Description |
 |------|-------------|
 | `region` | AWS region to deploy into |
+| `prefix` | Prefix added to all resource names and as a tag, for identification and to avoid collisions |
 | `common_tags` | Map of tags applied to all resources |
 | `ses_source_email` | Address from which alert emails are sent (must be verified in SES) |
 | `ses_target_emails` | List of email addresses to notify when errors occur (each must be verified in SES) |
