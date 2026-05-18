@@ -11,6 +11,7 @@ module "lambda_notifyOnError" {
   description                    = "Notifies admin when lambda functions encounter an error."
   handler                        = "lambda_function.lambda_handler"
   runtime                        = "python3.14"
+  architectures                  = ["arm64"]
   memory_size                    = 512
   timeout                        = 300
   reserved_concurrent_executions = 1 # To avoid duplicated emails
