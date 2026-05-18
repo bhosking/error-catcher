@@ -87,4 +87,4 @@ The Lambda can be invoked directly with a custom time window (useful for testing
 }
 ```
 
-When invoked this way, duplicate-suppression is skipped and error checking occurs regardless of alarm state.
+When invoked this way, duplicate-suppression is skipped and error checking occurs regardless of alarm state. end_ms is optional and defaults to the current time.
