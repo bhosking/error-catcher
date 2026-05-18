@@ -63,8 +63,8 @@ Each email address will receive an SNS subscription confirmation that must be ac
 
 | Name | Version |
 |------|---------|
-| Terraform | >= 1.5.7 |
-| AWS provider | >= 5.0 |
+| Terraform | >= 1.9.0 |
+| AWS provider | ~> 6.0 |
 
 ## Inputs
 
